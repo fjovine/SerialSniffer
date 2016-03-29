@@ -1,7 +1,6 @@
 # SerialSniffer
 
-A serial sniffer sits between two devices communicating through a serial channel, typically RS232C, that reads all the data interchanged 
-between the devices. In this version, one of the devices must be a PC running .NET, typically a PC under Windows.
+A serial sniffer sits between two devices communicating through a serial channel, typically RS232C, and reads (sniffs) all the data interchanged between the devices. In this version, one of the devices must be a PC running .NET, typically a PC under Windows.
 
 ![Layout](Doc/layout.png)
 
@@ -12,8 +11,8 @@ So the situation is as follows:
 
 1. **com0com** installs two virtual ports **VP1** and **VP2** internally connected each other
 2. The **Communicating Software**, that normally talks to the **Connected device** through a real **COM** port, is programmed to use the virtual port **VP1** instead
-3. The **SerialSniffer** is connnected both to the virtual port **VP1** and to the real port **P1**.
-   It relays all the data flowing in both directions. All data arriving from **VP1** are transmitted to **P1**, all data arriving from **P1** are transmitted to **VP1**.
+3. The **SerialSniffer** is connnected both to the virtual port **VP2** and to the real port **P1**.
+   It relays all the data flowing in both directions. All data arriving from **VP2** (originating from the software) are transmitted to **P1**, all data arriving from **P1** are transmitted to **VP2** and then redirected to the softwre .
    Additionally, it stores this data into a log file.
    
 Note
