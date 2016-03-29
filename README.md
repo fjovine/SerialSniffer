@@ -3,7 +3,7 @@
 A serial sniffer sits between two devices communicating through a serial channel, typically RS232C, that reads all the data interchanged 
 between the devices. In this version, one of the devices must be a PC running .NET, typically a PC under Windows.
 
-![Layout](doc/layout.png)
+![Layout](Doc/layout.png)
 
 This solution relies on the well known **com0com** open source signed device driver available [here](http://com0com.sourceforge.net/).
 that creates a virtual "null-modem" connection between two virtual serial ports on the PC. 
