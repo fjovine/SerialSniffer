@@ -30,6 +30,9 @@ namespace SerialSniffer
         /// </summary>
         private SerialPort simulated;
 
+        /// <summary>
+        /// Origin where the last packet came from.
+        /// </summary>
         private Origin lastOrigin = Origin.Undefined;
 
         /// <summary>
@@ -37,6 +40,11 @@ namespace SerialSniffer
         /// is locked forcing incoming requests to wait for the previous packet processing to be finished.
         /// </summary>
         private object sync = new object();
+
+        /// <summary>
+        /// Buffer accumulating the bytes coming from packets having the same origin.
+        /// </summary>
+        private List<byte> bytesArrivedSameOrigin;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Sniffer" /> class.
@@ -74,6 +82,11 @@ namespace SerialSniffer
         /// </summary>
         public event SniffedPacketAvailabe Available;
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the arriving packets should be collapsed, i.e. that all the subsequent data coming from the same source is collapsed
+        /// in only one packet. If this option is chosen, the sniffed data will contain one packet coming from the device and the following coming from the software, i.e.
+        /// it is impossible to have two successive packets coming from the same origin.
+        /// </summary>
         public bool IsCollapsingSameOrigin
         {
             get;
@@ -102,7 +115,7 @@ namespace SerialSniffer
                 lock (sync)
                 {
                     var packet = RelayAvailableData(simulated, real);
-                    this.managePacket(Origin.FromSimulated, packet);
+                    this.ManagePacket(Origin.FromSimulated, packet);
                 }
             };
 
@@ -111,7 +124,7 @@ namespace SerialSniffer
                 lock (sync)
                 {
                     var packet = RelayAvailableData(real, simulated);
-                    this.managePacket(Origin.FromReal, packet);
+                    this.ManagePacket(Origin.FromReal, packet);
                 }
             };
 
@@ -119,37 +132,40 @@ namespace SerialSniffer
             this.real.Open();
         }
         
-        private List<byte> bytesArrivedSameOrigin;
-
-        private void managePacket(Origin origin, byte[] packet)
+        /// <summary>
+        /// This method receives all the packets with their origin and decides what to do (if collapse them or not) following the <c>IsCollapsingSameOrigin</c> property.
+        /// </summary>
+        /// <param name="origin">Where the packet comes from.</param>
+        /// <param name="packet">Byte array forming the packet.</param>
+        private void ManagePacket(Origin origin, byte[] packet)
         {
             if (this.IsCollapsingSameOrigin)
             {
                 if (this.lastOrigin == Origin.Undefined)
                 {
-                    bytesArrivedSameOrigin = new List<byte>();
-                    lastOrigin = origin;
+                    this.bytesArrivedSameOrigin = new List<byte>();
+                    this.lastOrigin = origin;
                 }
                 else
                 {
-                    if (origin == lastOrigin)
+                    if (origin == this.lastOrigin)
                     {
-                        bytesArrivedSameOrigin.AddRange(packet);
+                        this.bytesArrivedSameOrigin.AddRange(packet);
                     }
                     else
                     {
-                        SniffedPacketEventArgs eventArgs = new SniffedPacketEventArgs(DateTime.Now, lastOrigin, bytesArrivedSameOrigin);
-                        OnSniffedPacketAvailable(eventArgs);
-                        bytesArrivedSameOrigin.Clear();
-                        bytesArrivedSameOrigin.AddRange(packet);
-                        lastOrigin = origin;
+                        SniffedPacketEventArgs eventArgs = new SniffedPacketEventArgs(DateTime.Now, this.lastOrigin, this.bytesArrivedSameOrigin);
+                        this.OnSniffedPacketAvailable(eventArgs);
+                        this.bytesArrivedSameOrigin.Clear();
+                        this.bytesArrivedSameOrigin.AddRange(packet);
+                        this.lastOrigin = origin;
                     }
                 }
             }
             else
             {
                 SniffedPacketEventArgs eventArgs = new SniffedPacketEventArgs(DateTime.Now, origin, packet);
-                OnSniffedPacketAvailable(eventArgs);
+                this.OnSniffedPacketAvailable(eventArgs);
             }
         }
 

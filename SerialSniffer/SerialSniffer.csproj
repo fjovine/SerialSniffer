@@ -45,13 +45,22 @@
   <ItemGroup>
     <Compile Include="ByteEnumerableExtensions.cs" />
     <Compile Include="ByteExtensions.cs" />
+    <Compile Include="CommandLineArgumentException.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="CommandLineArgumentParser.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
+    <Compile Include="GlobalParameters.cs" />
     <Compile Include="Origin.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="SniffedPacketEventArgs.cs" />
-    <Compile Include="Sniffer.cs" />
+    <Compile Include="Sniffer.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

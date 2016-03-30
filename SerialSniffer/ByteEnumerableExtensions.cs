@@ -16,6 +16,27 @@ namespace SerialSniffer
     public static class ByteEnumerableExtensions
     {
         /// <summary>
+        /// Enumerates the possible format options.
+        /// </summary>
+        public enum Format
+        {
+            /// <summary>
+            /// Both the hex decoded bytes and the ASCII counterparts are shown on the same line
+            /// </summary>
+            Plain,
+
+            /// <summary>
+            /// Only hex data is shown
+            /// </summary>
+            OnlyHex,
+
+            /// <summary>
+            /// Only ASCII encoding is shown with a dot for non printable characters
+            /// </summary>
+            OnlyAscii
+        }
+
+        /// <summary>
         /// Prints the content of the enumeration on the output string in two columns: the leftmost is for 
         /// hex representation of data, the rightmost is for ASCII representation with . for non printable
         /// characters. A similar format to the <c>Hexdump</c> utility.
@@ -25,9 +46,10 @@ namespace SerialSniffer
         /// </summary>
         /// <param name="theEnumeration">The byte enumeration to be printed.</param>
         /// <param name="preamble">Preamble string, see the description of the method.</param>
+        /// <param name="format">Format to be used generating the output.</param>
         /// <param name="bytesPerRow">Number of bytes per row. The default is 16.</param>
         /// <returns>A string formatted as described by the method description.</returns>
-        public static string ToHex(this IEnumerable<byte> theEnumeration, string preamble, int bytesPerRow = 16)
+        public static string ToHex(this IEnumerable<byte> theEnumeration, string preamble, Format format = Format.Plain, int bytesPerRow = 16)
         {
             string trailingSpaces = new string(' ', preamble.Length);
             int elementsCount = theEnumeration.Count<byte>();
@@ -63,10 +85,22 @@ namespace SerialSniffer
                         result.Append(trailingSpaces);
                     }
 
-                    result.Append(hexPart);
-                    result.Append(' ', 3 * (bytesPerRow - pos));
-                    result.Append("| ");
-                    result.Append(asciiPart);
+                    if (format != Format.OnlyAscii)
+                    {
+                        result.Append(hexPart);
+                    }
+
+                    if (format != Format.OnlyHex)
+                    {
+                        if (format == Format.Plain)
+                        {
+                            result.Append(' ', 3 * (bytesPerRow - pos));
+                            result.Append("| ");
+                        }
+
+                        result.Append(asciiPart);
+                    }
+
                     pos = 0;
                     hexPart.Clear();
                     asciiPart.Clear();
