@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -22,6 +22,13 @@ using System.Runtime.InteropServices;
 // Se il progetto viene esposto a COM, il GUID seguente verrà utilizzato come ID della libreria dei tipi
 [assembly: Guid("bff257ab-9824-4324-acef-49cb63f03457")]
 
+// TODO
+// - Attivare il parametro collapsed da linea di comando
+// - Sincronizzare i parametri gui ai valori di linea di comando
+// - memorizzare i parameteri sul registry
+// - Eliminare il problema che non esce chiudendo la finestra
+// - In modalità GUI l'output su file deve essere a comando
+//
 // Le informazioni sulla versione di un assembly sono costituite dai seguenti quattro valori:
 //
 //      Versione principale
@@ -32,5 +39,10 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build 
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.0.2")]
+[assembly: AssemblyFileVersion("1.0.0.2")]
+
+//// 1.0.0.2  Compiled 31/03/2016 22.33.36
+
+//// 1.0.0.1  Compiled 31/03/2016 22.29.14
+//// Prima versione operativa con gui funzionante bicolore

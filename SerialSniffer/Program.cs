@@ -10,6 +10,7 @@ namespace SerialSniffer
     using System;
     using System.IO;
     using Bsc;
+    using System.Windows;
 
     /// <summary>
     /// Main class of the SerialSniffer.
@@ -20,13 +21,22 @@ namespace SerialSniffer
         /// Entry point of the utility.
         /// </summary>
         /// <param name="args">Command line.</param>
+        [STAThread]
         public static void Main(string[] args)
         {
             TextWriter outputFile = null;
             try
             {
                 GlobalParameters.ParseCommandLineArguments(args);
-                outputFile = DoSniff();
+                if (GlobalParameters.IsGui)
+                {
+                    Application application = new Application();
+                    application.Run(new Gui());
+                }
+                else
+                {
+                    outputFile = DoSniff();
+                }
             }
             catch (CommandLineArgumentException e)
             {
@@ -34,7 +44,11 @@ namespace SerialSniffer
                 PrintUsage();
             }
 
-            Console.ReadLine();
+            if (!GlobalParameters.IsGui)
+            {
+                Console.ReadLine();
+            }
+
             if (outputFile != null)
             {
                 outputFile.Close();
@@ -61,16 +75,6 @@ namespace SerialSniffer
                 GlobalParameters.TransmissionDataBits);
 
             sniffer.IsCollapsingSameOrigin = GlobalParameters.IsShowCollapsed;
-            ByteEnumerableExtensions.Format outputFormat = ByteEnumerableExtensions.Format.Plain;
-
-            if (GlobalParameters.IsOnlyAscii)
-            {
-                outputFormat = ByteEnumerableExtensions.Format.OnlyAscii;
-            }
-            else if (GlobalParameters.IsOnlyHex)
-            {
-                outputFormat = ByteEnumerableExtensions.Format.OnlyHex;
-            }
 
             TextWriter outputFile = null;
             if (GlobalParameters.OutputFileName.ToLower() == "stdout")
@@ -89,28 +93,32 @@ namespace SerialSniffer
                     start = e.When;
                     isFirst = false;
                 }
-
-                string preamble = string.Empty;
-
-                if (GlobalParameters.IsShowTime)
-                {
-                    preamble = string.Format(
-                        "{0:yyyy-MM-dd HH mm ss.fff} {1} ",
-                        e.When,
-                        e.Origin == Origin.FromReal ? '<' : '>');
-                }
-                else
-                {
-                    preamble = string.Format(
-                        "{0,10:0.000} {1} ",
-                        e.When.Subtract(start).TotalMilliseconds,
-                        e.Origin == Origin.FromReal ? '<' : '>');
-                }
-
-                outputFile.WriteLine(e.Content.ToHex(preamble, outputFormat, GlobalParameters.BytesPerLine));
+                outputFile.WriteLine(DecodeArrivedPacket(e, start));
             };
             sniffer.OpenAndSniff();
             return outputFile;
+        }
+
+        public static string DecodeArrivedPacket(SniffedPacketEventArgs e, DateTime start)
+        {
+            string preamble = string.Empty;
+
+            if (GlobalParameters.IsShowTime)
+            {
+                preamble = string.Format(
+                    "{0:yyyy-MM-dd HH mm ss.fff} {1} ",
+                    e.When,
+                    e.Origin == Origin.FromReal ? '<' : '>');
+            }
+            else
+            {
+                preamble = string.Format(
+                    "{0,10:0.000} {1} ",
+                    e.When.Subtract(start).TotalMilliseconds,
+                    e.Origin == Origin.FromReal ? '<' : '>');
+            }
+
+            return e.Content.ToHex(preamble, GlobalParameters.OutputFormat, GlobalParameters.BytesPerLine);
         }
 
         /// <summary>

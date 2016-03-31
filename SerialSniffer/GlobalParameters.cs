@@ -171,11 +171,29 @@ namespace SerialSniffer
             private set;
         }
 
-        /// <summary>
-        /// Parses the passed command line parameters and populates the static properties used as global parameters of this application.
-        /// </summary>
-        /// <param name="args">String array containing the command line parameters.</param>
-        public static void ParseCommandLineArguments(string[] args)
+        public static ByteEnumerableExtensions.Format OutputFormat
+        {
+            get
+            {
+                ByteEnumerableExtensions.Format result = ByteEnumerableExtensions.Format.Plain;
+
+                if (GlobalParameters.IsOnlyAscii)
+                {
+                    result = ByteEnumerableExtensions.Format.OnlyAscii;
+                }
+                else if (GlobalParameters.IsOnlyHex)
+                {
+                    result = ByteEnumerableExtensions.Format.OnlyHex;
+                }
+                return result;
+            }
+        }
+
+/// <summary>
+/// Parses the passed command line parameters and populates the static properties used as global parameters of this application.
+/// </summary>
+/// <param name="args">String array containing the command line parameters.</param>
+public static void ParseCommandLineArguments(string[] args)
         {
             CommandLineArgumentParser.ParseArguments(args);
             VirtualPort = CommandLineArgumentParser.GetParamValue("-virtual");
