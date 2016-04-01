@@ -6,7 +6,8 @@
     xmlns:local="clr-namespace:SerialSniffer"
     mc:Ignorable="d" 
     d:DesignHeight="300" d:Width="Auto"
-    Title="SerialSniffer" >
+    Title="SerialSniffer" 
+    Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -19,18 +20,18 @@
             <Label Content="RealPort" VerticalAlignment="Center"/>
             <TextBox x:Name="RealPorts" Width="50" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.RealPort}"/>
             <Label Content="Baud rate" VerticalAlignment="Center"/>
-            <ComboBox x:Name="Baud" Margin="0,5,0,5">
-                <ComboBoxItem IsSelected="False">38400</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">19200</ComboBoxItem>
+            <ComboBox x:Name="Baud" Margin="0,5,0,5" SelectedValue="{x:Static local:GlobalParameters.TransmissionParity}">
+                <ComboBoxItem>38400</ComboBoxItem>
+                <ComboBoxItem>19200</ComboBoxItem>
                 <ComboBoxItem IsSelected="True">9600</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">4800</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">2400</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">1200</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">600</ComboBoxItem>
-                <ComboBoxItem IsSelected="False">300</ComboBoxItem>
+                <ComboBoxItem>4800</ComboBoxItem>
+                <ComboBoxItem>2400</ComboBoxItem>
+                <ComboBoxItem>1200</ComboBoxItem>
+                <ComboBoxItem>600</ComboBoxItem>
+                <ComboBoxItem>300</ComboBoxItem>
             </ComboBox>
             <Label Content="Parity" VerticalAlignment="Center" />
-            <ComboBox x:Name="Parity" Margin="0,5,0,5">
+            <ComboBox x:Name="Parity" Margin="0,5,0,5" SelectedValue="{x:Static local:GlobalParameters.TransmissionParity}" >
                 <ComboBoxItem IsSelected="True">None</ComboBoxItem>
                 <ComboBoxItem>Even</ComboBoxItem>
                 <ComboBoxItem>Odd</ComboBoxItem>
@@ -56,9 +57,9 @@
             </FlowDocument>
         </RichTextBox>
         <DockPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Beige" LastChildFill="True">
-            <CheckBox x:Name="OnlyHex" Content="Only hex" VerticalAlignment="Center" Margin="5"/>
-            <CheckBox x:Name="OnlyAscii" Content="Only ASCII" VerticalAlignment="Center"/>
-            <CheckBox x:Name="Time" Content="Time" VerticalAlignment="Center"/>
+            <CheckBox x:Name="OnlyHex" Content="Only hex" VerticalAlignment="Center" Margin="5" IsChecked="{x:Static local:GlobalParameters.IsOnlyHex}"/>
+            <CheckBox x:Name="OnlyAscii" Content="Only ASCII" VerticalAlignment="Center" IsChecked="{x:Static local:GlobalParameters.IsOnlyAscii }"/>
+            <CheckBox x:Name="Time" Content="Time" VerticalAlignment="Center" IsChecked="{x:Static local:GlobalParameters.IsShowTime}"/>
             <Label Content="Bytes per line" VerticalAlignment="Center"/>
             <ComboBox x:Name="BytesPerLine" Margin="0,5,0,5">
                 <ComboBoxItem>8</ComboBoxItem>

@@ -1,21 +1,39 @@
-﻿using System;
-using System.IO;
-using System.Threading;
-using System.Windows;
-using System.Windows.Documents;
-using System.Windows.Media;
+﻿//-----------------------------------------------------------------------
+// <copyright file="Gui.xaml.cs" company="hiLab">
+//     Copyright (c) Francesco Iovine.
+// </copyright>
+// <author>Francesco Iovine iovinemeccanica@gmail.com</author>
+//-----------------------------------------------------------------------
 
 namespace SerialSniffer
 {
+    using System;
+    using System.Threading;
+    using System.Windows;
+    using System.Windows.Documents;
+    using System.Windows.Media;
+
     /// <summary>
-    /// Logica di interazione per Gui.xaml
+    /// Interaction with <c>Gui.xaml</c> that is the main GUI for the serial sniffer.
     /// </summary>
     public partial class Gui : Window
     {
-        volatile bool startRequest = false;
+        /// <summary>
+        /// Flag that signals the request to start sniffing the serial line.
+        /// </summary>
+        private volatile bool startRequest = false;
+
+        /// <summary>
+        /// Flag that signals the request to stop sniffing the serial line
+        /// </summary>
+        private volatile bool stopRequest = false;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Gui" /> class.
+        /// </summary>
         public Gui()
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
             Thread runner = new Thread(() =>
             {
@@ -23,9 +41,6 @@ namespace SerialSniffer
                 {
                     if (startRequest)
                     {
-                        DateTime start = DateTime.MinValue;
-                        bool isFirst = true;
-
                         Sniffer sniffer = new Sniffer(
                             GlobalParameters.VirtualPort,
                             GlobalParameters.RealPort,
@@ -34,8 +49,10 @@ namespace SerialSniffer
                             GlobalParameters.TransmissionStopBits,
                             GlobalParameters.TransmissionDataBits);
 
+                        DateTime start = DateTime.MinValue;
+                        bool isFirst = true;
+
                         sniffer.IsCollapsingSameOrigin = GlobalParameters.IsShowCollapsed;
-                        //TextWriter outputFile = new StreamWriter(GlobalParameters.OutputFileName);
 
                         sniffer.Available += (s, ee) =>
                         {
@@ -44,6 +61,7 @@ namespace SerialSniffer
                                 start = ee.When;
                                 isFirst = false;
                             }
+
                             string sniffed = Program.DecodeArrivedPacket(ee, start);
                             this.SnifferOuput.Dispatcher.BeginInvoke((Action)(() =>
                             {
@@ -60,24 +78,54 @@ namespace SerialSniffer
                                     par.Background = Brushes.OldLace;
                                     par.Foreground = Brushes.Red;
                                 }
-                                par.Background = (ee.Origin == Origin.FromReal) ? Brushes.AliceBlue: Brushes.OldLace;
+
+                                par.Background = (ee.Origin == Origin.FromReal) ? Brushes.AliceBlue : Brushes.OldLace;
                                 par.Inlines.Add(sniffed);
                                 this.SnifferOuput.Document.Blocks.Add(par);
                                 this.SnifferOuput.ScrollToEnd();
                             }));
                         };
-                        sniffer.OpenAndSniff();
+                        try
+                        {
+                            sniffer.OpenAndSniff();
+                        }
+                        catch (System.IO.IOException)
+                        {
+                            MessageBox.Show("Connection error: probably one ports has a wrong name");
+                        }
+
                         startRequest = false;
+                    }
+
+                    if (stopRequest)
+                    {
+                        stopRequest = false;
+                        break;
                     }
                 }
             });
             runner.Start();
         }
 
+        /// <summary>
+        /// Event handler called when the start stop button on the GUI is pressed.
+        /// </summary>
+        /// <param name="sender">The parameter is not used.</param>
+        /// <param name="e">The parameter is not used.</param>
         private void StartStop_Click(object sender, RoutedEventArgs e)
         {
             this.StartStop.IsEnabled = false;
             this.startRequest = true;
+        }
+
+        /// <summary>
+        /// Event handler for the closure of the main window
+        /// </summary>
+        /// <param name="sender">The parameter is not used.</param>
+        /// <param name="e">The parameter is not used.</param>
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            this.stopRequest = true;
         }
     }
 }

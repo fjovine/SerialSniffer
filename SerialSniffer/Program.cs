@@ -9,8 +9,8 @@ namespace SerialSniffer
 {
     using System;
     using System.IO;
-    using Bsc;
     using System.Windows;
+    using Bsc;
 
     /// <summary>
     /// Main class of the SerialSniffer.
@@ -33,6 +33,10 @@ namespace SerialSniffer
                     Application application = new Application();
                     application.Run(new Gui());
                 }
+                else if (GlobalParameters.IsHelp)
+                {
+                    PrintUsage();
+                }
                 else
                 {
                     outputFile = DoSniff();
@@ -43,10 +47,9 @@ namespace SerialSniffer
                 Console.WriteLine(e.Message);
                 PrintUsage();
             }
-
-            if (!GlobalParameters.IsGui)
+            catch (IOException)
             {
-                Console.ReadLine();
+                Console.WriteLine("Communication error: check if the port names are correct");
             }
 
             if (outputFile != null)
@@ -93,12 +96,20 @@ namespace SerialSniffer
                     start = e.When;
                     isFirst = false;
                 }
+
                 outputFile.WriteLine(DecodeArrivedPacket(e, start));
             };
             sniffer.OpenAndSniff();
             return outputFile;
         }
 
+        /// <summary>
+        /// Computes a string that shows a decoded version of the sniffed packet.
+        /// </summary>
+        /// <param name="e">Argument object containing the packed to be decoded.</param>
+        /// <param name="start">Start time when the packet has been sniffed. This time is reliable when the <see cref="GlobalParameters.IsShowCollapsed"/> is false. When
+        /// it is true, it should be considered that the packet could be composed of strings of characters loaded non contiguously.</param>
+        /// <returns>>The decoded version of the sniffed packet.</returns>
         public static string DecodeArrivedPacket(SniffedPacketEventArgs e, DateTime start)
         {
             string preamble = string.Empty;
@@ -119,23 +130,6 @@ namespace SerialSniffer
             }
 
             return e.Content.ToHex(preamble, GlobalParameters.OutputFormat, GlobalParameters.BytesPerLine);
-        }
-
-        /// <summary>
-        /// Parses the command line arguments and shows help if applicable
-        /// </summary>
-        /// <param name="args">Command line arguments.</param>
-        private static void ParseArguments(string[] args)
-        {
-            // Handle the special case "-help" separately
-            if (args.Length == 1 && args[0].Trim() == "-help")
-            {
-                PrintUsage();
-            }
-            else
-            {
-                CommandLineArgumentParser.ParseArguments(args);
-            }
         }
 
         /// <summary>
@@ -162,13 +156,15 @@ namespace SerialSniffer
             Console.WriteLine("  -time: Optional flag. If defined, then the time when data arrives will be shown in the ");
             Console.WriteLine("         YYYY-MM-DD HH:mm:ss.fff format");
             Console.WriteLine("  -gui: Optional flag. If defined an interactive gui is shown");
-            Console.WriteLine("  -bytesPerLine: Optiona number of bytes shown per line. Default 16");
+            Console.WriteLine("  -bytesPerLine: Optional number of bytes shown per line. Default 16");
+            Console.WriteLine("  -collapsed: if true, then the successive packets from the same origin a re shown together. Optional, default false");
             Console.WriteLine("  -help: this help description");
             Console.WriteLine("The default format contains both hex and ascii and the time is shown as milliseconds elapsed");
             Console.WriteLine("since the first packet has been sniffed.");
             Console.WriteLine();
             Console.WriteLine("EXAMPLE:");
             Console.WriteLine("1. > SerialSniffer -virtual COM1 -real COM2 -baud 9600 -output sniffed.txt");
+            Console.ReadLine();
             Environment.Exit(1);
         }
     }

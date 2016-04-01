@@ -20,12 +20,21 @@ namespace SerialSniffer
         /// </summary>
         static GlobalParameters()
         {
-            // Mandatory parameters of the application decoded from the command line or determined as default values.
+            // Unique parameters that can be used alone
+            string[] uniqueParameters =
+            {
+                "-gui",
+                "-help"
+            };
+            CommandLineArgumentParser.DefineUniqueParameters(uniqueParameters);
+
+            // Mandatory parameters of the application decoded from the command line.
             string[] requiredArguments =
             {
                 "-virtual",
                 "-real",
             };
+
             CommandLineArgumentParser.DefineRequiredParameters(requiredArguments);
 
             // Optional parameters
@@ -46,8 +55,7 @@ namespace SerialSniffer
                         "-onlyHex",
                         "-onlyAscii",
                         "-time",
-                        "-collapsed",
-                        "-gui"
+                        "-collapsed"
                     };
             CommandLineArgumentParser.DefineSwitches(switches);
         }
@@ -74,6 +82,15 @@ namespace SerialSniffer
         /// Gets a value indicating whether a GUI should be shown
         /// </summary>
         public static bool IsGui
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether the help window should be shown.
+        /// </summary>
+        public static bool IsHelp
         {
             get;
             private set;
@@ -171,6 +188,11 @@ namespace SerialSniffer
             private set;
         }
 
+        /// <summary>
+        /// Gets the output format decoding two GlobalParameters: <see cref="GlobalParameters.IsOnlyAscii"/> and <see cref="GlobalParameters.IsOnlyHex"/>
+        /// If none are set, then <see cref="ByteEnumerableExtensions.Format.Plain"/> is returned, otherwise <c>IsOnlyAscii</c> has the priority over the other predicate, i.e.
+        /// if <c>IsOnlyAscii</c> is true, <see cref="ByteEnumerableExtensions.Format.OnlyAscii"/> is returned even if also IsOnlyHex is true.
+        /// </summary>
         public static ByteEnumerableExtensions.Format OutputFormat
         {
             get
@@ -185,17 +207,32 @@ namespace SerialSniffer
                 {
                     result = ByteEnumerableExtensions.Format.OnlyHex;
                 }
+
                 return result;
             }
         }
 
-/// <summary>
-/// Parses the passed command line parameters and populates the static properties used as global parameters of this application.
-/// </summary>
-/// <param name="args">String array containing the command line parameters.</param>
-public static void ParseCommandLineArguments(string[] args)
+        /// <summary>
+        /// Parses the passed command line parameters and populates the static properties used as global parameters of this application.
+        /// </summary>
+        /// <param name="args">String array containing the command line parameters.</param>
+        public static void ParseCommandLineArguments(string[] args)
         {
+            IsGui = false;
             CommandLineArgumentParser.ParseArguments(args);
+            if (CommandLineArgumentParser.UniqueParameter != null)
+            {
+                if (CommandLineArgumentParser.UniqueParameter == "-gui")
+                {
+                    IsGui = true;
+                }
+
+                if (CommandLineArgumentParser.UniqueParameter == "-help")
+                {
+                    IsHelp = true;
+                }
+            }
+
             VirtualPort = CommandLineArgumentParser.GetParamValue("-virtual");
             RealPort = CommandLineArgumentParser.GetParamValue("-real");
             OutputFileName = CommandLineArgumentParser.GetParamValue("-output");
@@ -228,7 +265,6 @@ public static void ParseCommandLineArguments(string[] args)
             IsOnlyHex = CommandLineArgumentParser.IsSwitchOn("-onlyHex");
             IsOnlyAscii = CommandLineArgumentParser.IsSwitchOn("-onlyAscii");
             IsShowTime = CommandLineArgumentParser.IsSwitchOn("-time");
-            IsGui = CommandLineArgumentParser.IsSwitchOn("-gui");
             IsShowCollapsed = CommandLineArgumentParser.IsSwitchOn("-collapsed");
         }
     }

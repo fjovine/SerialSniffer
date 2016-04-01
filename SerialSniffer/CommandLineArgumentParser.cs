@@ -37,6 +37,8 @@ namespace Bsc
         /// </summary>
         private const string PARAM_SEPARATOR = "-";
 
+        private static Dictionary<string, string> uniqueParameters;
+
         /// <summary>
         /// Stores the name=value required parameters.
         /// </summary>
@@ -67,6 +69,21 @@ namespace Bsc
         /// </summary>
         private static List<string> rawArguments;
         
+        public static void DefineUniqueParameters(string[] uniqueParameters)
+        {
+            CommandLineArgumentParser.uniqueParameters = new Dictionary<string, string>();
+
+            foreach (string param in uniqueParameters)
+            {
+                string temp = param.Trim();
+                if (string.IsNullOrEmpty(temp))
+                {
+                    throw new CommandLineArgumentException("Error: The unique command line parameter '" + param + "' is empty");
+                }
+                CommandLineArgumentParser.uniqueParameters.Add(param, string.Empty);
+            }
+        }
+
         /// <summary>
         /// Define the required parameters that the user of the program
         /// must provide.
@@ -190,6 +207,12 @@ namespace Bsc
             }
         }
 
+        public static string UniqueParameter
+        {
+            get;
+            private set;
+        }
+
         /// <summary>
         /// Parse the command line arguments.
         /// </summary>
@@ -198,8 +221,26 @@ namespace Bsc
         {
             rawArguments = new List<string>(args);
 
+            CommandLineArgumentParser.UniqueParameter = null;
+
             missingRequiredParameters = new List<string>();
             missingValue = new List<string>();
+
+            foreach (var param in args)
+            {
+                if (CommandLineArgumentParser.uniqueParameters.ContainsKey(param))
+                {
+                    if (args.Length== 1)
+                    {
+                        CommandLineArgumentParser.UniqueParameter = param;
+                        return;
+                    }
+                    else
+                    {
+                        throw new CommandLineArgumentException("The param '"+param+"' should be the only parameter on the command line");
+                    }
+                }
+            }
 
             ParseRequiredParameters();
             ParseOptionalParameters();
