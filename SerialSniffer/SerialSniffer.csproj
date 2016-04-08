@@ -69,6 +69,9 @@
     <Compile Include="Sniffer.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="Utils.cs" />
+    <Compile Include="WindowsRegistry.cs" />
+    <Compile Include="WindowsRegistryEntry.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

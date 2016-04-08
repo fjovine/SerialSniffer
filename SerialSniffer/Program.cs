@@ -4,11 +4,11 @@
 // </copyright>
 // <author>Francesco Iovine iovinemeccanica@gmail.com</author>
 //-----------------------------------------------------------------------
-
 namespace SerialSniffer
 {
     using System;
     using System.IO;
+    using System.Runtime.InteropServices;
     using System.Windows;
     using Bsc;
 
@@ -18,44 +18,43 @@ namespace SerialSniffer
     public class Program
     {
         /// <summary>
-        /// Entry point of the utility.
+        /// Win32 code to hide a window
         /// </summary>
-        /// <param name="args">Command line.</param>
-        [STAThread]
-        public static void Main(string[] args)
+        private const int SWHIDE = 0;
+
+        /// <summary>
+        /// Win32 code to show a window
+        /// </summary>
+        private const int SWSHOW = 5;
+
+        /// <summary>
+        /// Computes a string that shows a decoded version of the sniffed packet.
+        /// </summary>
+        /// <param name="e">Argument object containing the packed to be decoded.</param>
+        /// <param name="start">Start time when the packet has been sniffed. This time is reliable when the <see cref="GlobalParameters.IsShowCollapsed"/> is false. When
+        /// it is true, it should be considered that the packet could be composed of strings of characters loaded non contiguously.</param>
+        /// <returns>>The decoded version of the sniffed packet.</returns>
+        public static string DecodeArrivedPacket(SniffedPacketEventArgs e, DateTime start)
         {
-            TextWriter outputFile = null;
-            try
+            string preamble = string.Empty;
+
+            if (GlobalParameters.IsShowTime)
             {
-                GlobalParameters.ParseCommandLineArguments(args);
-                if (GlobalParameters.IsGui)
-                {
-                    Application application = new Application();
-                    application.Run(new Gui());
-                }
-                else if (GlobalParameters.IsHelp)
-                {
-                    PrintUsage();
-                }
-                else
-                {
-                    outputFile = DoSniff();
-                }
+                preamble = string.Format(
+                    "{0:yyyy-MM-dd HH mm ss.fff} {1} ",
+                    e.When,
+                    e.Origin == Origin.FromReal ? '<' : '>');
             }
-            catch (CommandLineArgumentException e)
+            else
             {
-                Console.WriteLine(e.Message);
-                PrintUsage();
-            }
-            catch (IOException)
-            {
-                Console.WriteLine("Communication error: check if the port names are correct");
+                preamble = string.Format(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    "{0,10:0.000} {1} ",
+                    e.When.Subtract(start).TotalMilliseconds,
+                    e.Origin == Origin.FromReal ? '<' : '>');
             }
 
-            if (outputFile != null)
-            {
-                outputFile.Close();
-            }
+            return e.Content.ToHex(preamble, GlobalParameters.OutputFormat, GlobalParameters.BytesPerLine);
         }
 
         /// <summary>
@@ -72,7 +71,7 @@ namespace SerialSniffer
             Sniffer sniffer = new Sniffer(
                 GlobalParameters.VirtualPort,
                 GlobalParameters.RealPort,
-                GlobalParameters.BaudRate,
+                GlobalParameters.TransmissionBaudRate,
                 GlobalParameters.TransmissionParity,
                 GlobalParameters.TransmissionStopBits,
                 GlobalParameters.TransmissionDataBits);
@@ -104,33 +103,65 @@ namespace SerialSniffer
         }
 
         /// <summary>
-        /// Computes a string that shows a decoded version of the sniffed packet.
+        /// This method hides the console window
         /// </summary>
-        /// <param name="e">Argument object containing the packed to be decoded.</param>
-        /// <param name="start">Start time when the packet has been sniffed. This time is reliable when the <see cref="GlobalParameters.IsShowCollapsed"/> is false. When
-        /// it is true, it should be considered that the packet could be composed of strings of characters loaded non contiguously.</param>
-        /// <returns>>The decoded version of the sniffed packet.</returns>
-        public static string DecodeArrivedPacket(SniffedPacketEventArgs e, DateTime start)
+        public static void HideConsoleWindow()
         {
-            string preamble = string.Empty;
+            var handle = GetConsoleWindow();
 
-            if (GlobalParameters.IsShowTime)
-            {
-                preamble = string.Format(
-                    "{0:yyyy-MM-dd HH mm ss.fff} {1} ",
-                    e.When,
-                    e.Origin == Origin.FromReal ? '<' : '>');
-            }
-            else
-            {
-                preamble = string.Format(
-                    "{0,10:0.000} {1} ",
-                    e.When.Subtract(start).TotalMilliseconds,
-                    e.Origin == Origin.FromReal ? '<' : '>');
-            }
-
-            return e.Content.ToHex(preamble, GlobalParameters.OutputFormat, GlobalParameters.BytesPerLine);
+            ShowWindow(handle, SWHIDE);
         }
+
+        /// <summary>
+        /// Entry point of the utility.
+        /// </summary>
+        /// <param name="args">Command line.</param>
+        [STAThread]
+        public static void Main(string[] args)
+        {
+            TextWriter outputFile = null;
+            try
+            {
+                GlobalParameters.ParseCommandLineArguments(args);
+                if (GlobalParameters.IsGui)
+                {
+                    HideConsoleWindow();
+                    Application application = new Application();
+                    application.Run(new Gui());
+                }
+                else if (GlobalParameters.IsHelp)
+                {
+                    PrintUsage();
+                }
+                else
+                {
+                    outputFile = DoSniff();
+                }
+            }
+            catch (CommandLineArgumentException e)
+            {
+                Console.WriteLine(e.Message);
+                PrintUsage();
+            }
+            catch (IOException)
+            {
+                Console.WriteLine("Communication error: check if the port names are correct");
+            }
+
+            if (!GlobalParameters.IsGui)
+            {
+                Console.WriteLine("Press a key to stop sniffing");
+                Console.ReadLine();
+            }
+
+            if (outputFile != null)
+            {
+                outputFile.Close();
+            }
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetConsoleWindow();
 
         /// <summary>
         /// Prints out the synopsis of the command and exits.
@@ -167,5 +198,8 @@ namespace SerialSniffer
             Console.ReadLine();
             Environment.Exit(1);
         }
+
+        [DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr windowHandle, int comandShow);
     }
 }

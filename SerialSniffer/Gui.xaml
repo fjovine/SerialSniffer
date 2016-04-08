@@ -7,18 +7,19 @@
     mc:Ignorable="d" 
     d:DesignHeight="300" d:Width="Auto"
     Title="SerialSniffer" 
-    Closing="Window_Closing">
+    Closing="Window_Closing"
+    Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" LastChildFill="True" Background="Beige">
+        <DockPanel Grid.Row="0" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Beige">
             <Label Content="Virtual port " VerticalAlignment="Center"/>
-            <TextBox x:Name="VirtualPorts" Width="50" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.VirtualPort}"/>
+            <TextBox x:Name="VirtualPort" Width="50" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.VirtualPort}"  TextChanged="VirtualPorts_TextChanged" />
             <Label Content="RealPort" VerticalAlignment="Center"/>
-            <TextBox x:Name="RealPorts" Width="50" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.RealPort}"/>
+            <TextBox x:Name="RealPort" Width="50" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.RealPort}" TextChanged="VirtualPorts_TextChanged"/>
             <Label Content="Baud rate" VerticalAlignment="Center"/>
             <ComboBox x:Name="Baud" Margin="0,5,0,5" SelectedValue="{x:Static local:GlobalParameters.TransmissionParity}">
                 <ComboBoxItem>38400</ComboBoxItem>
@@ -38,7 +39,6 @@
             </ComboBox>
             <Label Content="Stop bits" VerticalAlignment="Center" />
             <ComboBox x:Name="StopBits" Margin="0,5,0,5">
-                <ComboBoxItem>0</ComboBoxItem>
                 <ComboBoxItem IsSelected="True">1</ComboBoxItem>
                 <ComboBoxItem>1.5</ComboBoxItem>
                 <ComboBoxItem>2</ComboBoxItem>
@@ -48,26 +48,26 @@
                 <ComboBoxItem>7</ComboBoxItem>
                 <ComboBoxItem IsSelected="True">8</ComboBoxItem>
             </ComboBox>
-            <Label Content="Output file" VerticalAlignment="Center" />
-            <Button x:Name="FileBrowser" Content="v" Margin="0,5,0,5" />
-            <TextBox x:Name="OutputFilename" Margin="0,5,0,5" Text="{x:Static local:GlobalParameters.OutputFileName}"/>
+            <Button x:Name="FileBrowser" Width="50" Content="Save" Margin="5,5,0,5" HorizontalAlignment="Left" IsEnabled="False"/>
         </DockPanel>
         <RichTextBox x:Name="SnifferOuput" Grid.Row="1" VerticalScrollBarVisibility="Auto" FontFamily="Global Monospace">
             <FlowDocument x:Name="Document">
             </FlowDocument>
         </RichTextBox>
         <DockPanel Grid.Row="2" VerticalAlignment="Top" HorizontalAlignment="Stretch" Background="Beige" LastChildFill="True">
-            <CheckBox x:Name="OnlyHex" Content="Only hex" VerticalAlignment="Center" Margin="5" IsChecked="{x:Static local:GlobalParameters.IsOnlyHex}"/>
-            <CheckBox x:Name="OnlyAscii" Content="Only ASCII" VerticalAlignment="Center" IsChecked="{x:Static local:GlobalParameters.IsOnlyAscii }"/>
-            <CheckBox x:Name="Time" Content="Time" VerticalAlignment="Center" IsChecked="{x:Static local:GlobalParameters.IsShowTime}"/>
+            <CheckBox x:Name="OnlyHex" Content="Only hex" VerticalAlignment="Center" Margin="5,0,5,0" IsChecked="{x:Static local:GlobalParameters.IsOnlyHex}"/>
+            <CheckBox x:Name="OnlyAscii" Content="Only ASCII" VerticalAlignment="Center" Margin="0,0,5,0" IsChecked="{x:Static local:GlobalParameters.IsOnlyAscii }"/>
+            <CheckBox x:Name="Time" Content="Time" VerticalAlignment="Center" Margin="0,0,5,0" IsChecked="{x:Static local:GlobalParameters.IsShowTime}"/>
+            <CheckBox x:Name="ShowCollapsed" Content="Collapsed" VerticalAlignment="Center" Margin="0,0,5,0" IsChecked="{x:Static local:GlobalParameters.IsShowCollapsed}"/>
             <Label Content="Bytes per line" VerticalAlignment="Center"/>
             <ComboBox x:Name="BytesPerLine" Margin="0,5,0,5">
                 <ComboBoxItem>8</ComboBoxItem>
                 <ComboBoxItem IsSelected="True">16</ComboBoxItem>
                 <ComboBoxItem>32</ComboBoxItem>
+                <ComboBoxItem>64</ComboBoxItem>
+                <ComboBoxItem>128</ComboBoxItem>
             </ComboBox>
-            <Button x:Name="StartStop" Content="Start" Margin="5,5,5,5" Click="StartStop_Click"
-                    />
+            <Button x:Name="StartStop" Content="Start" Margin="5,5,5,5" Click="StartStop_Click" IsEnabled="False" />
         </DockPanel>
     </Grid>
 </Window>
