@@ -68,7 +68,7 @@ namespace SerialSniffer
 
                         sniffer.IsCollapsingSameOrigin = GlobalParameters.IsShowCollapsed;
 
-                        sniffer.Available += (s, ee) =>
+                        sniffer.PacketAvailable += (s, ee) =>
                         {
                             if (isFirst)
                             {

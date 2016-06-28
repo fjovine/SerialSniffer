@@ -88,7 +88,7 @@ namespace SerialSniffer
                 outputFile = new StreamWriter(GlobalParameters.OutputFileName);
             }
 
-            sniffer.Available += (s, e) =>
+            sniffer.PacketAvailable += (s, e) =>
             {
                 if (isFirst)
                 {

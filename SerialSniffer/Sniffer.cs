@@ -1,4 +1,4 @@
-﻿//-----------------------------------------------------------------------
+﻿    //--------------------------------------------------------------------Serial---
 // <copyright file="Sniffer.cs" company="hiLab">
 //     Copyright (c) Francesco Iovine.
 // </copyright>
@@ -75,12 +75,12 @@ namespace SerialSniffer
         /// </summary>
         /// <param name="sender">Sender object of the event.</param>
         /// <param name="e">Arguments of the event.</param>
-        public delegate void SniffedPacketAvailabe(object sender, SniffedPacketEventArgs e);
+        public delegate void SniffedPacketAvailable(object sender, SniffedPacketEventArgs e);
 
         /// <summary>
         /// Event triggered whenever a new packet is available, coming from any ports.
         /// </summary>
-        public event SniffedPacketAvailabe Available;
+        public event SniffedPacketAvailable PacketAvailable;
 
         /// <summary>
         /// Gets or sets a value indicating whether the arriving packets should be collapsed, i.e. that all the subsequent data coming from the same source is collapsed
@@ -99,13 +99,13 @@ namespace SerialSniffer
         /// <param name="e">Class containing information about the packet being received.</param>
         public void OnSniffedPacketAvailable(SniffedPacketEventArgs e)
         {
-            if (this.Available != null)
+            if (this.PacketAvailable != null)
             {
-                this.Available(this, e);
+                this.PacketAvailable(this, e);
             }
         }
 
-        /// <summary>cv f
+        /// <summary>
         /// Starts the process of sniffing.
         /// </summary>
         public void OpenAndSniff()
