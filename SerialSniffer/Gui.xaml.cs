@@ -4,7 +4,6 @@
 // </copyright>
 // <author>Francesco Iovine iovinemeccanica@gmail.com</author>
 //-----------------------------------------------------------------------
-
 namespace SerialSniffer
 {
     using System;
@@ -63,6 +62,7 @@ namespace SerialSniffer
                             GlobalParameters.TransmissionStopBits,
                             GlobalParameters.TransmissionDataBits);
 
+                        sniffer.Mode = GlobalParameters.Mode;
                         DateTime start = DateTime.MinValue;
                         bool isFirst = true;
 
@@ -186,7 +186,7 @@ namespace SerialSniffer
         /// <returns>True if the name is not a valid serial port name</returns>
         private bool CheckFilenameError(TextBox textBox)
         {
-            string [] ports = SerialPort.GetPortNames();
+            string[] ports = SerialPort.GetPortNames();
 
             bool result;
             string filename = textBox.Text;
@@ -239,6 +239,11 @@ namespace SerialSniffer
             this.ShowCollapsed.IsChecked = boolTemp;
             WindowsRegistry.Get(WindowsRegistryEntry.ISTIME, out boolTemp, false);
             this.Time.IsChecked = boolTemp;
+        }
+
+        private void FileBrowser_Click()
+        {
+
         }
     }
 }

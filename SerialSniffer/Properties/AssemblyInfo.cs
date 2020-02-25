@@ -38,8 +38,75 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build 
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.70")]
-[assembly: AssemblyFileVersion("1.0.0.70")]
+[assembly: AssemblyVersion("1.0.0.101")]
+[assembly: AssemblyFileVersion("1.0.0.101")]
+
+//// 1.0.0.101  Compiled 25.02.2020 08:08:46
+
+//// 1.0.0.100  Compiled 11/11/2017 17.52.25
+
+//// 1.0.0.99  Compiled 18/08/2017 21:48:56
+
+//// 1.0.0.98  Compiled 8/16/2017 10:16:52 PM
+
+//// 1.0.0.97  Compiled 11/08/2017 16.04.54
+//// When only ascii, newline interrupts the flow of output
+
+//// 1.0.0.96  Compiled 11/08/2017 15.54.55
+
+//// 1.0.0.95  Compiled 11/08/2017 15.46.27
+
+//// 1.0.0.94  Compiled 11/08/2017 15.44.05
+
+//// 1.0.0.93  Compiled 11/08/2017 15.39.03
+
+//// 1.0.0.92  Compiled 11/08/2017 15.36.58
+
+//// 1.0.0.91  Compiled 11/08/2017 15.35.39
+
+//// 1.0.0.90  Compiled 11/08/2017 15.33.41
+
+//// 1.0.0.89  Compiled 11/08/2017 15.28.09
+
+//// 1.0.0.88  Compiled 11/08/2017 15.26.42
+//// When in collapsed, a timeout of 0.1 seconds before emitting
+
+//// 1.0.0.87  Compiled 11.08.2017 13:38:00
+//// Added NONE option as -tx to transform the sniffer in a terminal reader
+
+//// 1.0.0.86  Compiled 11.08.2017 13:24:11
+
+//// 1.0.0.85  Compiled 04.01.2017 10:29:50
+
+//// 1.0.0.84  Compiled 04.01.2017 10:28:38
+//// Added Mode combo box to GUI
+
+//// 1.0.0.83  Compiled 04.01.2017 10:22:08
+
+//// 1.0.0.82  Compiled 04.01.2017 10:20:22
+
+//// 1.0.0.81  Compiled 04.01.2017 10:04:33
+
+//// 1.0.0.80  Compiled 04.01.2017 10:02:19
+
+//// 1.0.0.79  Compiled 04.01.2017 09:59:35
+
+//// 1.0.0.78  Compiled 04.01.2017 09:55:17
+
+//// 1.0.0.77  Compiled 04.01.2017 09:53:22
+
+//// 1.0.0.76  Compiled 04.01.2017 09:48:16
+
+//// 1.0.0.75  Compiled 04.01.2017 09:07:52
+//// Added support for Y Cable mode
+
+//// 1.0.0.74  Compiled 14.10.2016 07:51:06
+
+//// 1.0.0.73  Compiled 29.06.2016 08:53:09
+
+//// 1.0.0.72  Compiled 29.06.2016 08:52:59
+
+//// 1.0.0.71  Compiled 28.06.2016 16:21:53
 
 //// 1.0.0.70  Compiled 07/04/2016 19.18.07
 

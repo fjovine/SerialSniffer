@@ -15,7 +15,7 @@ namespace SerialSniffer
     /// <summary>
     /// Main class of the SerialSniffer.
     /// </summary>
-    public class Program
+    public static class Program
     {
         /// <summary>
         /// Win32 code to hide a window
@@ -36,7 +36,7 @@ namespace SerialSniffer
         /// <returns>>The decoded version of the sniffed packet.</returns>
         public static string DecodeArrivedPacket(SniffedPacketEventArgs e, DateTime start)
         {
-            string preamble = string.Empty;
+            string preamble;
 
             if (GlobalParameters.IsShowTime)
             {
@@ -76,10 +76,11 @@ namespace SerialSniffer
                 GlobalParameters.TransmissionStopBits,
                 GlobalParameters.TransmissionDataBits);
 
+            sniffer.Mode = GlobalParameters.Mode;
             sniffer.IsCollapsingSameOrigin = GlobalParameters.IsShowCollapsed;
 
             TextWriter outputFile = null;
-            if (GlobalParameters.OutputFileName.ToLower() == "stdout")
+            if (GlobalParameters.OutputFileName.ToLower(System.Globalization.CultureInfo.InvariantCulture) == "stdout")
             {
                 outputFile = Console.Out;
             }
@@ -96,7 +97,12 @@ namespace SerialSniffer
                     isFirst = false;
                 }
 
-                outputFile.WriteLine(DecodeArrivedPacket(e, start));
+                string arrivedPacket = DecodeArrivedPacket(e, start);
+                outputFile.WriteLine(arrivedPacket);
+                if (outputFile != Console.Out)
+                {
+                    Console.WriteLine(arrivedPacket);
+                }
             };
             sniffer.OpenAndSniff();
             return outputFile;
@@ -170,12 +176,12 @@ namespace SerialSniffer
         {
             Console.WriteLine();
             Console.WriteLine("USAGE:");
-            Console.WriteLine("SerialSniffer.exe -virtual <string> -real <string> [-baud <int>] [-parity (none|odd|even)]");
+            Console.WriteLine("SerialSniffer.exe -rx <string> -tx <string> [-baud <int>] [-parity (none|odd|even)]");
             Console.WriteLine("                   [-stopbit (1|2|1.5)][-data (7|8)] [-onlyHex] [-onlyAscii] [-time]");
             Console.WriteLine();
             Console.WriteLine("OPTIONS:");
-            Console.WriteLine("  -virtual : the name of the virtual (connected via con0con) port. Mandatory.");
-            Console.WriteLine("  -real : the name of the real (connected to the device) port. Mandatory");
+            Console.WriteLine("  -rx : the name of the virtual (connected via con0con) port or the port connected to RX line in -ycable mode. Mandatory.");
+            Console.WriteLine("  -tx : the name of the real (connected to the device) port or the port connected to TX line in -ycable mode. . Mandatory");
             Console.WriteLine("  -output : the name of the file where the sniffed data will be stored. Mandatory");
             Console.WriteLine();
             Console.WriteLine("  -baud: baud rate with the real device. Optional, default 9600");
@@ -187,6 +193,7 @@ namespace SerialSniffer
             Console.WriteLine("  -time: Optional flag. If defined, then the time when data arrives will be shown in the ");
             Console.WriteLine("         YYYY-MM-DD HH:mm:ss.fff format");
             Console.WriteLine("  -gui: Optional flag. If defined an interactive gui is shown");
+            Console.WriteLine("  -ycable: Optional flag. If defined, a Y Cable is used, otherwise the com0com interface.");
             Console.WriteLine("  -bytesPerLine: Optional number of bytes shown per line. Default 16");
             Console.WriteLine("  -collapsed: if true, then the successive packets from the same origin a re shown together. Optional, default false");
             Console.WriteLine("  -help: this help description");
@@ -194,7 +201,7 @@ namespace SerialSniffer
             Console.WriteLine("since the first packet has been sniffed.");
             Console.WriteLine();
             Console.WriteLine("EXAMPLE:");
-            Console.WriteLine("1. > SerialSniffer -virtual COM1 -real COM2 -baud 9600 -output sniffed.txt");
+            Console.WriteLine("1. > SerialSniffer -rx COM1 -tx COM2 -baud 9600 -output sniffed.txt");
             Console.ReadLine();
             Environment.Exit(1);
         }

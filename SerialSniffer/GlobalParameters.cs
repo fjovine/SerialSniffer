@@ -13,7 +13,7 @@ namespace SerialSniffer
     /// <summary>
     /// Contains the global parameters 
     /// </summary>
-    public class GlobalParameters
+    public static class GlobalParameters
     {
         /// <summary>
         /// Maps the value used for the <c>stopbis</c> (GUI and line commands) to the enum items
@@ -42,8 +42,8 @@ namespace SerialSniffer
             // Mandatory parameters of the application decoded from the command line.
             string[] requiredArguments =
             {
-                "-virtual",
-                "-real",
+                "-rx",
+                "-tx",
             };
 
             CommandLineArgumentParser.DefineRequiredParameters(requiredArguments);
@@ -62,12 +62,13 @@ namespace SerialSniffer
 
             // Supported switches
             string[] switches =
-                {
-                        "-onlyHex",
-                        "-onlyAscii",
-                        "-time",
-                        "-collapsed"
-                    };
+            {
+                "-onlyHex",
+                "-onlyAscii",
+                "-time",
+                "-collapsed",
+                "-ycable"
+            };
             CommandLineArgumentParser.DefineSwitches(switches);
         }
 
@@ -104,6 +105,15 @@ namespace SerialSniffer
         /// Gets a value indicating whether the help window should be shown.
         /// </summary>
         public static bool IsHelp
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Gets the mode of operation of the sniffer.
+        /// </summary>
+        public static SnifferMode Mode
         {
             get;
             private set;
@@ -255,8 +265,8 @@ namespace SerialSniffer
                 }
             }
 
-            VirtualPort = CommandLineArgumentParser.GetParamValue("-virtual");
-            RealPort = CommandLineArgumentParser.GetParamValue("-real");
+            VirtualPort = CommandLineArgumentParser.GetParamValue("-tx");
+            RealPort = CommandLineArgumentParser.GetParamValue("-rx");
             OutputFileName = CommandLineArgumentParser.GetParamValue("-output");
             TransmissionBaudRate = int.Parse(CommandLineArgumentParser.GetParamValue("-baud"));
             BytesPerLine = int.Parse(CommandLineArgumentParser.GetParamValue("-bytesPerLine"));
@@ -282,6 +292,7 @@ namespace SerialSniffer
             IsOnlyAscii = CommandLineArgumentParser.IsSwitchOn("-onlyAscii");
             IsShowTime = CommandLineArgumentParser.IsSwitchOn("-time");
             IsShowCollapsed = CommandLineArgumentParser.IsSwitchOn("-collapsed");
+            Mode = CommandLineArgumentParser.IsSwitchOn("-ycable") ? SnifferMode.YCable : SnifferMode.Simulate;
         }
 
         /// <summary>

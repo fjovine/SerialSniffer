@@ -1,4 +1,4 @@
-﻿    //--------------------------------------------------------------------Serial---
+﻿//--------------------------------------------------------------------Serial---
 // <copyright file="Sniffer.cs" company="hiLab">
 //     Copyright (c) Francesco Iovine.
 // </copyright>
@@ -12,34 +12,49 @@ namespace SerialSniffer
 
     /// <summary>
     /// Implements a serial line sniffer. <para/>
+    /// This class can work in two different modes: using a simulated virtual com port or using an Y cable.
+    /// <para>SIMULATED PORT</para>
     /// The core concept is represented by the <see cref="http://com0com.sourceforge.net/"/> driver that creates a 
     /// couple of com ports that are connected one the other with a sort of virtual null modem: all that is sent to one 
     /// of these ports can be seen at the other one and vice versa.<para/>
     /// So this sniffer works as a relay that transmits all what it receives on one port to the other and vice versa.
+    /// <para>Y CABLE</para>
+    /// This mode needs an external cable that redirects to two different serial inputs the RX and TX (Receive and Transmit) lines
+    /// of the RS232 cable.
+    /// This system, with respect to the virtual one, has the disadvantage of needing an external device (Y Cable) but has the following advantages
+    /// <list type="bullet">
+    /// <item>Imposes no delay to the transmission.</item>
+    /// <item>Can be used on a computer that does not run the software to be sniffed</item>
+    /// </list>
+    /// NOTE: In both modes the data comes from two different ports. For legacy reasons they are called <see cref="real"/> and <see cref="simulated"/> but in Y Cable mode 
+    /// the real port is the port connected to the RX wire, the simulated port is the onec connected to the TX wire.
     /// </summary>
     public class Sniffer
     {
         /// <summary>
         /// Real port that is connected to the external device.
+        /// In
         /// </summary>
-        private SerialPort real;
+        private readonly SerialPort real;
 
         /// <summary>
         /// Simulated serial port. This is typically the port connected to the com0com virtual device, i.e.
         /// communicates with the host software.
         /// </summary>
-        private SerialPort simulated;
+        private readonly SerialPort simulated;
 
         /// <summary>
         /// Origin where the last packet came from.
         /// </summary>
         private Origin lastOrigin = Origin.Undefined;
 
+        private DateTime whenLastPacket;
+
         /// <summary>
         /// Object used to synchronize the receiving process of packets. When data is being processed, this object
         /// is locked forcing incoming requests to wait for the previous packet processing to be finished.
         /// </summary>
-        private object sync = new object();
+        private readonly object sync = new object();
 
         /// <summary>
         /// Buffer accumulating the bytes coming from packets having the same origin.
@@ -57,17 +72,31 @@ namespace SerialSniffer
         /// <param name="dataBits">Number of data bit to be used.</param>
         public Sniffer(string simulatedPortName, string realPortName, int baudRate, Parity parity, StopBits stopBits, int dataBits)
         {
-            this.simulated = new SerialPort(simulatedPortName);
+            if (simulatedPortName.ToUpperInvariant().CompareTo("NONE") == 0)
+            {
+                this.simulated = null;
+            }
+            else
+            {
+                this.simulated = new SerialPort(simulatedPortName);
+                this.simulated.BaudRate = baudRate;
+                this.simulated.Parity = parity;
+                this.simulated.StopBits = stopBits;
+                this.simulated.DataBits = dataBits;
+            }
             this.real = new SerialPort(realPortName);
-            this.simulated.BaudRate = baudRate;
-            this.simulated.Parity = parity;
-            this.simulated.StopBits = stopBits;
-            this.simulated.DataBits = dataBits;
             this.real.BaudRate = baudRate;
             this.real.Parity = parity;
             this.real.StopBits = stopBits;
             this.real.DataBits = dataBits;
             this.IsCollapsingSameOrigin = false;
+            this.Mode = SnifferMode.Simulate;
+        }
+
+        public SnifferMode Mode
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -99,10 +128,7 @@ namespace SerialSniffer
         /// <param name="e">Class containing information about the packet being received.</param>
         public void OnSniffedPacketAvailable(SniffedPacketEventArgs e)
         {
-            if (this.PacketAvailable != null)
-            {
-                this.PacketAvailable(this, e);
-            }
+            this.PacketAvailable?.Invoke(this, e);
         }
 
         /// <summary>
@@ -110,14 +136,17 @@ namespace SerialSniffer
         /// </summary>
         public void OpenAndSniff()
         {
-            this.simulated.DataReceived += (s, e) =>
+            if (this.simulated != null)
             {
-                lock (sync)
+                this.simulated.DataReceived += (s, e) =>
                 {
-                    var packet = RelayAvailableData(simulated, real);
-                    this.ManagePacket(Origin.FromSimulated, packet);
-                }
-            };
+                    lock (sync)
+                    {
+                        var packet = RelayAvailableData(simulated, real);
+                        this.ManagePacket(Origin.FromSimulated, packet);
+                    }
+                };
+            }
 
             this.real.DataReceived += (s, e) =>
             {
@@ -128,7 +157,10 @@ namespace SerialSniffer
                 }
             };
 
-            this.simulated.Open();
+            if (this.simulated != null)
+            {
+                this.simulated.Open();
+            }
             this.real.Open();
         }
         
@@ -145,10 +177,11 @@ namespace SerialSniffer
                 {
                     this.bytesArrivedSameOrigin = new List<byte>();
                     this.lastOrigin = origin;
+                    whenLastPacket = DateTime.Now;
                 }
                 else
                 {
-                    if (origin == this.lastOrigin)
+                    if (origin == this.lastOrigin && whenLastPacket.AddMilliseconds(1000) > DateTime.Now)
                     {
                         this.bytesArrivedSameOrigin.AddRange(packet);
                     }
@@ -159,6 +192,7 @@ namespace SerialSniffer
                         this.bytesArrivedSameOrigin.Clear();
                         this.bytesArrivedSameOrigin.AddRange(packet);
                         this.lastOrigin = origin;
+                        whenLastPacket = DateTime.Now;
                     }
                 }
             }
@@ -178,10 +212,15 @@ namespace SerialSniffer
         /// <returns>The packet as a byte array.</returns>
         private byte[] RelayAvailableData(SerialPort from, SerialPort to)
         {
-            int bytesAvailable = from.BytesToRead;
-            byte[] result = new byte[bytesAvailable];
-            from.Read(result, 0, bytesAvailable);
-            to.Write(result, 0, bytesAvailable);
+            byte[] receiveBuffer = new byte[from.ReadBufferSize];
+            int bytesRead = from.Read(receiveBuffer, 0, receiveBuffer.Length);
+            byte[] result = new byte[bytesRead];
+
+            Array.Copy(receiveBuffer, result, bytesRead);
+            if (Mode == SnifferMode.Simulate && to != null)
+            {
+                to.Write(result, 0, bytesRead);
+            }
             return result;
         }
     }

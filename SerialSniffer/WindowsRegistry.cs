@@ -179,12 +179,9 @@ namespace SerialSniffer
         public static void Get(string key, ComboBox comboBox, string defValue, Dictionary<string, string> registry2item = null)
         {
             string value = Get(key, defValue);
-            if (registry2item != null)
+            if (registry2item != null && registry2item.ContainsKey(value))
             {
-                if (registry2item.ContainsKey(value))
-                {
-                    value = registry2item[value];
-                }
+                value = registry2item[value];
             }
 
             int indexToSelect = 0;

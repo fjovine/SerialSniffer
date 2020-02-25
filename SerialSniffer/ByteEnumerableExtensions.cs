@@ -71,7 +71,7 @@ namespace SerialSniffer
                 hexPart.Append(' ');
                 asciiPart.Append(by.PrintPrintableOrPoint());
                 totalCounter++;
-                if (++pos >= bytesPerRow || totalCounter >= elementsCount)
+                if (++pos >= bytesPerRow || totalCounter >= elementsCount || (format == Format.OnlyAscii && by == 0x0A))
                 {
                     // new Row
                     if (isFirst)

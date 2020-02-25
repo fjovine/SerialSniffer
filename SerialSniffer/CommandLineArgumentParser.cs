@@ -6,9 +6,6 @@
 // Date: 04.02.2008
 //
 //-----------------------------------------------------------------------------
-
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
@@ -28,7 +25,7 @@ namespace Bsc
     /// <example>
     /// See ExampleUsage.cs
     /// </example>
-    public class CommandLineArgumentParser
+    public static class CommandLineArgumentParser
     {
         public const string Version = "1.0.0";
 
@@ -97,8 +94,6 @@ namespace Bsc
 
             foreach (string param in requiredParameterNames)
             {
-                string temp = param;
-                temp = temp.Trim();
                 if (string.IsNullOrEmpty(param))
                 {
                     string errorMessage = "Error: The required command line parameter '" + param + "' is empty.";
@@ -133,14 +128,13 @@ namespace Bsc
                 tokens[0] = tokens[0].Trim();
                 if (string.IsNullOrEmpty(tokens[0]))
                 {
-                    string errorMessage = "Error: The optional command line parameter '" + param + "' has empty name.";
-                    throw new CommandLineArgumentException(errorMessage);
+                    throw new CommandLineArgumentException("Error: The optional command line parameter '" + param + "' has empty name.");
                 }
 
                 tokens[1] = tokens[1].Trim();
                 if (string.IsNullOrEmpty(tokens[1]))
                 {
-                    string errorMessage = "Error: The optional command line parameter '" + param + "' has no value.";
+                    throw new CommandLineArgumentException("Error: The optional command line parameter '" + param + "' has no value.");
                 }
 
                 CommandLineArgumentParser.optionalParameters.Add(tokens[0], tokens[1]);
@@ -256,7 +250,7 @@ namespace Bsc
         /// <returns>The value of the perameter.</returns>
         public static string GetParamValue(string paramName)
         {
-            string paramValue = string.Empty;
+            string paramValue;
 
             if (requiredParameters.ContainsKey(paramName))
             {
@@ -281,19 +275,20 @@ namespace Bsc
             T result;
             if (!map2T.TryGetValue(paramValue, out result))
             {
-                string errorMessage = "Error: switch '" + paramName + "' can have only one of the following values:";
+                StringBuilder errorMessage = new StringBuilder("Error: switch '" + paramName + "' can have only one of the following values:");
                 foreach (var value in map2T.Keys)
                 {
-                    errorMessage += " " + value;
+                    errorMessage.Append(' ');
+                    errorMessage.Append(value);
                 }
-                throw new CommandLineArgumentException(errorMessage);
+                throw new CommandLineArgumentException(errorMessage.ToString());
             }
             return result;
         }
 
         public static bool IsSwitchOn(string switchName)
         {
-            bool switchValue = false;
+            bool switchValue;
 
             if (switches.ContainsKey(switchName))
             {

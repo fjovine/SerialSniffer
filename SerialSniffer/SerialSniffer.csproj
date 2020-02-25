@@ -57,6 +57,9 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GlobalParameters.cs" />
+    <Compile Include="GlobalSuppressions.cs">
+      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Gui.xaml.cs">
       <DependentUpon>Gui.xaml</DependentUpon>
     </Compile>
@@ -69,6 +72,7 @@
     <Compile Include="Sniffer.cs">
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
+    <Compile Include="SnifferMode.cs" />
     <Compile Include="Utils.cs" />
     <Compile Include="WindowsRegistry.cs" />
     <Compile Include="WindowsRegistryEntry.cs" />

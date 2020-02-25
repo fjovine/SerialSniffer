@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
     xmlns:local="clr-namespace:SerialSniffer"
     mc:Ignorable="d" 
-    d:DesignHeight="300" d:Width="Auto"
+    d:DesignHeight="300"
     Title="SerialSniffer" 
     Closing="Window_Closing"
     Loaded="Window_Loaded">
@@ -47,6 +47,11 @@
             <ComboBox x:Name="DataBits" Margin="0,5,0,5">
                 <ComboBoxItem>7</ComboBoxItem>
                 <ComboBoxItem IsSelected="True">8</ComboBoxItem>
+            </ComboBox>
+            <Label Content="Mode" VerticalAlignment="Center" />
+            <ComboBox x:Name="Mode" Margin="0,5,0,5" SelectedValue="{x:Static local:GlobalParameters.Mode}" >
+                <ComboBoxItem IsSelected="True">Simulate</ComboBoxItem>
+                <ComboBoxItem>Y cable</ComboBoxItem>
             </ComboBox>
             <Button x:Name="FileBrowser" Width="50" Content="Save" Margin="5,5,0,5" HorizontalAlignment="Left" IsEnabled="False"/>
         </DockPanel>
