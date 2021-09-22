@@ -57,9 +57,6 @@
       <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="GlobalParameters.cs" />
-    <Compile Include="GlobalSuppressions.cs">
-      <ExcludeFromStyleCop>True</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="Gui.xaml.cs">
       <DependentUpon>Gui.xaml</DependentUpon>
     </Compile>
