@@ -38,8 +38,12 @@ using System.Runtime.InteropServices;
 // È possibile specificare tutti i valori oppure impostare valori predefiniti per i numeri relativi alla revisione e alla build 
 // usando l'asterisco '*' come illustrato di seguito:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.101")]
-[assembly: AssemblyFileVersion("1.0.0.101")]
+[assembly: AssemblyVersion("1.0.0.103")]
+[assembly: AssemblyFileVersion("1.0.0.103")]
+
+//// 1.0.0.103  Compiled 22.09.2021 22:22:25
+
+//// 1.0.0.102  Compiled 22.09.2021 22:21:11
 
 //// 1.0.0.101  Compiled 25.02.2020 08:08:46
 
